@@ -17,6 +17,9 @@
  */
 #include "Ender.h"
 #include <lua.h>
+#include <lauxlib.h>
+
+#define ENDER_LUA_CORE "ender.core"
 /*============================================================================*
  *                                  Local                                     *
  *============================================================================*/
@@ -31,6 +34,7 @@ static void * _checkudata(lua_State * L, int narg)
 /*----------------------------------------------------------------------------*
  *                             The Lua C interface                            *
  *----------------------------------------------------------------------------*/
+#if 0
 static int l_ender_element_new(lua_State *L)
 {
 
@@ -65,13 +69,32 @@ static const luaL_reg _ender_api[] = {
 	{ "element_new", l_ender_element_new },
 	{ NULL, NULL }
 };
+#endif
+
+static int ender_lua_load(lua_State *L)
+{
+	/* check the input params */
+	/* load the lib we have requested */
+	printf("load\n");
+	return 0;
+}
+
+static const luaL_Reg ender_lua[] = {
+	{ "load", ender_lua_load },
+	{ NULL, NULL }
+};
+
 /*============================================================================*
  *                                   API                                      *
  *============================================================================*/
-int luaopen_ender(lua_State * L)
+int luaopen_ender(lua_State *L)
 {
-  	luaL_register (L, "ender", _ender_api);
+	ender_init();
+	lua_newtable(L);
+	luaL_register(L, NULL, ender_lua);
+
+	//luaL_newmetatable(L, ENDER_LUA_CORE);
+	//luaL_register(L, NULL, ender_lua);
+
 	return 1; /* api */
 }
-
-

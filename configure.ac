@@ -1,7 +1,7 @@
 # get rid of that stupid cache mechanism
 rm -f config.cache
 
-AC_INIT(enesim-lua, 0.0.1, enesim-devel@googlegroups.com)
+AC_INIT(ender-lua, 0.0.1, enesim-devel@googlegroups.com)
 AC_PREREQ(2.52)
 AC_CONFIG_SRCDIR(configure.ac)
 AC_CANONICAL_BUILD
@@ -9,7 +9,7 @@ AC_CANONICAL_HOST
 AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE(1.6 dist-bzip2)
-AM_CONFIG_HEADER(src/include/config.h)
+AM_CONFIG_HEADER(config.h)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_PROG_CC
@@ -45,32 +45,19 @@ AC_SUBST(create_shared_lib)
 PKG_CHECK_MODULES(ENDER, [ender >= 0.0.1])
 
 ## LUA
-# Lua pkg-config hack for different naming conventions
-have_lua="yes"
-requirement_lua=""
-lua_libs=""
-PKG_CHECK_MODULES([LUA], [lua >= 5.1.0], requirement_lua="lua",
-   [PKG_CHECK_MODULES([LUA], [lua5.1 >= 5.1.0], requirement_lua="lua5.1",
-      [PKG_CHECK_MODULES([LUA], [lua-5.1 >= 5.1.0], requirement_lua="lua-5.1",
-         [PKG_CHECK_MODULES([LUA], [lua51 >= 5.1.0], requirement_lua="lua51",
-            [have_lua="no"])])])])
-
-if test "x${have_lua}" = "xno" ; then
-   AC_MSG_CHECKING([whether lua_newstate() is in liblua])
-   AC_CHECK_LIB([lua], [lua_newstate],
-      [
-       have_lua="yes"
-       lua_libs="-llua"
-      ],
-      [have_lua="no"])
-   AC_MSG_RESULT([${have_lua}])
+# Expand prefix
+expanded_prefix=$prefix
+if test "x$prefix" = xNONE; then
+  expanded_prefix=${ac_default_prefix}
 fi
-AC_SUBST(lua_libs)
 
-ENESIM_LUA_CFLAGS="$ENDER_CFLAGS $LUA_CFLAGS"
-ENESIM_LUA_LIBS="$ENDER_LIBS $LUA_LIBS"
-AC_SUBST(ENESIM_LUA_CFLAGS)
-AC_SUBST(ENESIM_LUA_LIBS)
+PKG_CHECK_MODULES([LUA], [lua5.1])
+LUA_CMOD_DIR=$($PKG_CONFIG --define-variable=prefix=/usr --variable=INSTALL_CMOD lua5.1)
+AC_SUBST([LUA_CMOD_DIR])
+ENDER_LUA_CFLAGS="$ENDER_CFLAGS $LUA_CFLAGS"
+ENDER_LUA_LIBS="$ENDER_LIBS $LUA_LIBS"
+AC_SUBST(ENDER_LUA_CFLAGS)
+AC_SUBST(ENDER_LUA_LIBS)
 
 ## Make the debug preprocessor configurable
 
